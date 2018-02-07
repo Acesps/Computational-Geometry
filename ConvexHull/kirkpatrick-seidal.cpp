@@ -4,6 +4,7 @@
 #include <vector>
 #include "Grahams.h"
 #include "kirkpatrick_seidal.h"
+#include <unordered_set>
 
 #define pb push_back	
 
@@ -20,7 +21,6 @@ ostream& operator <<(ostream& o, vector<T> a){
 
 template< typename T>
 void display(T a[], int n){
-        
         for( int i=0;i<n;i++){
                 cout<<a[i]<<" ";
         }
@@ -28,8 +28,8 @@ void display(T a[], int n){
 }
 
 bool operator==(const cordinate &A,  cordinate &B){
- 	return A.x == B.x && A.y == B.x; 
- }
+	return A.x == B.x && A.y == B.x; 
+}
 
 void findpmin(vector<cordinate> &a, cordinate &pmin, 
 	cordinate &pmax,  cordinate &pmin2,  cordinate &pmax2){
@@ -37,44 +37,50 @@ void findpmin(vector<cordinate> &a, cordinate &pmin,
 	pmin = a[0];
 	pmax = a[0];
 	for(int i = 1; i < a.size(); i++){
-		if(a[i].x > pmax.x){
+		if(a[i].x > pmax.x || (a[i].x == pmax.x && a[i].y > pmax.y)){
 			pmax = a[i];
 			maxxindex = i; 
 		}
-		if(a[i].x < pmin.x){
+
+		if(a[i].x < pmin.x || (a[i].x == pmin.x && a[i].y > pmin.y)){
 			pmin = a[i];
 			minxindex = i; 
 		}
 	}
 	//removing both pmin and pmax
 	swap(a[minxindex], a[a.size()-1]);
+	if(maxxindex == a.size()-1){
+		maxxindex = minxindex;
+	}
 	swap(a[maxxindex], a[a.size()-2]);
 	a.pop_back();
 	a.pop_back();
 	//2. If there are two or more such pmin(pmax)
 	maxxindex = -1;
 	minxindex = -1;
+	pmax2 = pmax;
+	pmin2 = pmin;
 	for(int i = 0; i < a.size(); i++){
-		if(a[i].x == pmax.x){
+		if(a[i].x == pmax2.x && a[i].y < pmax2.y){
 			pmax2 = a[i];
-			maxxindex = i; 
+			maxxindex = i;
 		}
-		if(a[i].x == pmin.x){
+		if(a[i].x == pmin2.x && a[i].y < pmin2.y){
 			pmin2 = a[i];
-			minxindex = i; 
+			minxindex = i;
 		}
 	}
-	if(maxxindex < 0){
-		pmax2 = pmax;
+	if(maxxindex > -1){
+		swap(a[maxxindex], a[a.size()-1]);
+		if(minxindex == a.size()-1){
+			minxindex = maxxindex;
+		}
+		a.pop_back();
+
 	}
-	else{
-		swap(a[maxxindex], a[a.size()-1]);a.pop_back();
-	}
-	if(minxindex < 0){
-		pmin2 = pmin;
-	}
-	else{
-		swap(a[minxindex], a[a.size()-1]);a.pop_back();
+	if(minxindex > -1){
+		swap(a[minxindex], a[a.size()-1]);
+		a.pop_back();
 	}
 }
 
@@ -83,23 +89,34 @@ bool myfunction (cordinate i, cordinate j) { return (i.x < j.x); }
 
 vector<cordinate> divide(cordinate bottom, cordinate top, vector<cordinate> &points, int direction,int flag){
 	vector<cordinate> T;
-	if(bottom.y>top.y)
-		swap(bottom, top);
+	if(bottom.x == top.x && bottom.y == top.y){
+		return T;
+	}
 	for(int i = 0;i < points.size(); i++){
 		if(Graham::angle(bottom, top, points[i]) == direction){
 			T.pb(points[i]);
 		}
 	}
-	if(!flag) 
-		T.pb(top);
-	else
-		T.pb(bottom);
+	T.pb(top);
+	T.pb(bottom);
+	unordered_set<long long int> S;
+	for(int i = 0;i < T.size(); i++){
+		S.insert((T[i].x + 100000) + 1ll*1000000 * (T[i].y + 100000));
+	}
+	T.clear();
+	cordinate temp;
+	for(auto i = S.begin();i != S.end(); i++){
+		temp.x = (*i)%1000000 - 100000;
+		temp.y = (*i)/1000000 - 100000;
+		T.pb(temp);
+	}
+
 	return T;
 }
 
 void upperBridge(vector<cordinate> points, cordinate &pl, cordinate &pr, int a){
 	vector<cordinate> candidates;
-	random_shuffle (points.begin(),  points.end());
+	//random_shuffle (points.begin(),  points.end());
 	if(points.size() == 2){
 		if(points[0].x > points[1].x){
 			swap(points[0], points[1]);
@@ -155,6 +172,7 @@ void upperBridge(vector<cordinate> points, cordinate &pl, cordinate &pr, int a){
 		}
 	}
 	//7.
+	points.insert(points.end(),candidates.begin(),candidates.end());
 	vector<int> maxindex;
 	float maxintersect = points[0].y - K * points[0].x;
 	maxindex.pb(0);
@@ -219,7 +237,6 @@ void upperBridge(vector<cordinate> points, cordinate &pl, cordinate &pr, int a){
 
 void lowerBridge(vector<cordinate> points, cordinate &pl, cordinate &pr, int a){
 	vector<cordinate> candidates;
-	random_shuffle (points.begin(),  points.end());
 	if(points.size() == 2){
 		if(points[0].x > points[1].x){
 			swap(points[0], points[1]);
@@ -274,6 +291,7 @@ void lowerBridge(vector<cordinate> points, cordinate &pl, cordinate &pr, int a){
 		}
 	}
 	//7.
+	points.insert(points.end(),candidates.begin(),candidates.end());
 	vector<int> maxindex;
 	float maxintersect = points[0].y - K * points[0].x;
 	maxindex.pb(0);
@@ -288,14 +306,16 @@ void lowerBridge(vector<cordinate> points, cordinate &pl, cordinate &pr, int a){
 			maxindex.pb(i);	
 		}
 	}
+	
 	cordinate pk = points[maxindex[0]], pm = points[maxindex[0]];
-	for(int i = 1 ;i < maxindex.size(); i++){
-		if(points[maxindex[i]].x < pk.x)
-			pk = points[maxindex[i]];
-		if(points[maxindex[i]].x > pm.x)
-			pm = points[maxindex[i]];
-	}
-	//8.
+	{	
+		for(int i = 1 ;i < maxindex.size(); i++){
+			if(points[maxindex[i]].x < pk.x)
+				pk = points[maxindex[i]];
+			if(points[maxindex[i]].x > pm.x)
+				pm = points[maxindex[i]];
+		}
+	}//8.
 	if(pk.x <= a && pm.x > a){
 		pl = pk;
 		pr = pm;
@@ -338,15 +358,10 @@ void lowerBridge(vector<cordinate> points, cordinate &pl, cordinate &pr, int a){
 }
 	
 
-list<cordinate> UPPER_HULL(cordinate pmin, cordinate pmax, vector<cordinate> &points){
+list<cordinate> UPPER_HULL(cordinate pmin, cordinate pmax, vector<cordinate> points){
 	list<cordinate> upper;
 	if(pmin.x == pmax.x && pmin.y == pmax.y){
 		upper.push_back(pmin);
-		return upper;
-	}
-	if(points.size()==1){
-		upper.pb(pmin);
-		upper.pb(pmax);
 		return upper;
 	}
 	//finding median in O(n)
@@ -355,7 +370,7 @@ list<cordinate> UPPER_HULL(cordinate pmin, cordinate pmax, vector<cordinate> &po
 	cordinate pl, pr;	
 	upperBridge(points, pl, pr, points[n/2].x);
 	vector<cordinate> Tleft = divide(pmin, pl, points, 1, 0);//1==counterclockwise
-	vector<cordinate> Tright = divide(pr, pmax, points, 2, 0);//2==clockwise
+	vector<cordinate> Tright = divide(pmax, pr, points, 2, 0);//2==clockwise
 	upper = UPPER_HULL(pmin, pl, Tleft);
 	upper.splice(upper.end(), UPPER_HULL(pr, pmax, Tright));
 	return upper;
@@ -367,18 +382,12 @@ list<cordinate> LOWER_HULL(cordinate pmin, cordinate pmax, vector<cordinate> &po
 		lower.push_back(pmin);
 		return lower;
 	}
-	if(points.size()==1){
-		lower.pb(pmax);
-		lower.pb(pmin);
-		return lower;
-	}
-	//finding median in O(n)
 	int n = points.size();
 	nth_element(points.begin(), points.begin() + n/2, points.end(), myfunction);
 	cordinate pl, pr;
 	lowerBridge(points, pl, pr, points[n/2].x);
-	vector<cordinate> Tleft = divide(pmin, pl, points, 1, 1);//1==counterclockwise
-	vector<cordinate> Tright = divide(pmax, pr, points, 2, 1);//2==clockwise 
+	vector<cordinate> Tleft = divide(pmin, pl, points, 2, 1);//2==clockwise
+	vector<cordinate> Tright = divide(pmax, pr, points, 1, 1);//1==counterclockwise
 	lower = LOWER_HULL(pr, pmax, Tright);
 	lower.splice(lower.end(),LOWER_HULL(pmin, pl, Tleft) );
 	return lower;
@@ -409,4 +418,5 @@ void KIRKPATRICK_SEIDAL::kirkpatrick_seidal(vector<cordinate> cordinates){
 	}
 	upper.splice(upper.end(), lower);
 	for_each(upper.begin(), upper.end(), [] (cordinate i){cout<<i.x<<" "<<i.y<<"\n";});
+	cout<<"Number of points in Convex Hull "<<upper.size();
 }

@@ -11,6 +11,15 @@
 
 using namespace std;
 
+template < typename T>
+ostream& operator <<(ostream& o,vector<T> a){
+	size_t n= a.size();
+	for(size_t i=0;i<n;i++){
+		o<<a[i].x<<" "<<a[i].y<<"\n";
+	}
+	return o;
+}
+
 
 int main()
 {	/*cordinate points[] = {{0, 3}, {1, 1}, {2, 2}, {4, 4},
@@ -39,9 +48,12 @@ int main()
 			cordinates.pb(input);
 		}
 	}
-	clock_t t; 
-	t=clock();
-  	Graham::Grahams(cordinates);
+	/*cout<<"points are"<<endl;
+	cout<<cordinates;
+	*/
+	cout<<"running Graham's Algorithm:"<<endl;
+	clock_t t=clock();
+	Graham::Grahams(cordinates);
     cout << "Time taken by Graham's Algorithm:" << (t-clock()) * 1000.0 / CLOCKS_PER_SEC << " ms" << '\n';
     t=clock();  
     KIRKPATRICK_SEIDAL::kirkpatrick_seidal(cordinates);
