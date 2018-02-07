@@ -91,6 +91,6 @@ void Graham::Grahams(vector<cordinate> cordinates){
 		S.pb(cordinates[i]);
 	}
 	cout<<S;
-	cout<<"Number of points in Convex Hull "<<S.size();
+	cout<<"Number of points in Convex Hull "<<S.size()<<endl;
 }
 

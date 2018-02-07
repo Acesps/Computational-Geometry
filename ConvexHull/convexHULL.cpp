@@ -3,6 +3,7 @@
 #include <vector>
 #include "Grahams.h"
 #include "kirkpatrick_seidal.h"
+#include "jarvis.h"
 #include <ctime>
 #include <stdlib.h>     
 #include <time.h>       
@@ -30,7 +31,7 @@ int main()
 	int n,ans;
 	cordinate input;
 	vector<cordinate> cordinates;
-	cout<<"Select mode:\n\t 1> Random points \n 2>Feed points from stdin\n press 1 | 2\n";
+	cout<<"Select mode:\n\t 1> Random points \n\t 2>Feed points from stdin\n press 1 | 2\n";
 	cin>>ans;
 	cout<<"Enter the Number of points\n";
 	cin>>n;
@@ -51,11 +52,18 @@ int main()
 	/*cout<<"points are"<<endl;
 	cout<<cordinates;
 	*/
-	cout<<"running Graham's Algorithm:"<<endl;
+	cout<<"Running Graham's Algorithm:"<<endl;
 	clock_t t=clock();
 	Graham::Grahams(cordinates);
     cout << "Time taken by Graham's Algorithm:" << (t-clock()) * 1000.0 / CLOCKS_PER_SEC << " ms" << '\n';
-    t=clock();  
+	
+	cout<<"Running Jarvis Algorithm:"<<endl;
+	t=clock();  
+    Jarvis::jarvis(cordinates);
+    cout << "Time taken by Jarvis Algorithm:" << (t-clock()) * 1000.0 / CLOCKS_PER_SEC << " ms" << '\n';
+    
+    cout<<"Running kirkpatrick-seidal Algorithm:"<<endl;
+	t=clock();  
     KIRKPATRICK_SEIDAL::kirkpatrick_seidal(cordinates);
     cout << "Time taken by kirkpatrick-seidal Algorithm:" << (t-clock()) * 1000.0 / CLOCKS_PER_SEC << " ms" << '\n';
     return 0;

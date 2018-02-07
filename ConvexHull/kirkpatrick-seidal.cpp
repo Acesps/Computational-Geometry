@@ -395,6 +395,7 @@ list<cordinate> LOWER_HULL(cordinate pmin, cordinate pmax, vector<cordinate> &po
 
 
 void KIRKPATRICK_SEIDAL::kirkpatrick_seidal(vector<cordinate> cordinates){
+	if(cordinates.size() < 3) return ;
 	cordinate pmin, pmax, pmin2, pmax2;
 	findpmin(cordinates, pmin, pmax, pmin2, pmax2);
 	//adding pmin and pmax and calling upper hull 
@@ -418,5 +419,5 @@ void KIRKPATRICK_SEIDAL::kirkpatrick_seidal(vector<cordinate> cordinates){
 	}
 	upper.splice(upper.end(), lower);
 	for_each(upper.begin(), upper.end(), [] (cordinate i){cout<<i.x<<" "<<i.y<<"\n";});
-	cout<<"Number of points in Convex Hull "<<upper.size();
+	cout<<"Number of points in Convex Hull "<<upper.size()<<endl;
 }
